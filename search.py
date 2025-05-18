@@ -155,8 +155,25 @@ def depthFirstSearch(problem: 'SearchProblem') -> List[str]:
         >>> print(f"Start's successors: {problem.getSuccessors(problem.getStartState())}")
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    start = problem.getStartState()
 
+    stack = Stack()
+    stack.push((start, []))
+    visited = set()
+
+    while not stack.isEmpty():
+        state, path = stack.pop()
+
+        if problem.isGoalState(state):
+            return path
+        
+        if state not in visited:
+            visited.add(state)
+            for successor, action, cost in problem.getSuccessors(state):
+                if successor not in visited:
+                    stack.push((successor, path + [action]))
+                        
+    return []
 
 def breadthFirstSearch(problem: 'SearchProblem') -> List[str]:
     """Search the shallowest nodes in the search tree first using BFS.
@@ -172,7 +189,25 @@ def breadthFirstSearch(problem: 'SearchProblem') -> List[str]:
                   or empty list if no solution exists
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    start = problem.getStartState()
+
+    queue = Queue()
+    queue.push((start, []))
+    visited = set()
+
+    while not queue.isEmpty():
+        state, path = queue.pop()
+
+        if problem.isGoalState(state):
+            return path
+        
+        if state not in visited:
+            visited.add(state)
+            for successor, action, cost in problem.getSuccessors(state):
+                if successor not in visited:
+                    queue.push((successor, path + [action]))
+                        
+    return []
 
 
 def uniformCostSearch(problem: 'SearchProblem') -> List[str]:
@@ -189,7 +224,24 @@ def uniformCostSearch(problem: 'SearchProblem') -> List[str]:
                   total cost, or empty list if no solution exists
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    pq = PriorityQueue()
+    pq.push((problem.getStartState(), [], 0), 0)
+    visited = set()
+
+    while not pq.isEmpty():
+        state, path, cost = pq.pop()
+
+        if problem.isGoalState(state):
+            return path
+        
+        if state not in visited:
+            visited.add(state)
+            for successor, action, stepCost in problem.getSuccessors(state):
+                if successor not in visited:
+                    newCost = cost + stepCost
+                    pq.push((successor, path + [action], newCost), newCost)
+
+    return []
 
 def nullHeuristic(state: Any, problem: Optional['SearchProblem'] = None) -> float:
     """Return a trivial heuristic estimate of 0 for any state.
@@ -223,8 +275,29 @@ def aStarSearch(problem: 'SearchProblem', heuristic: Callable = nullHeuristic) -
                   or empty list if no solution exists
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    pq = PriorityQueue()
+    start = problem.getStartState()
+    pq.push((start, [], 0), heuristic(start, problem)) # (state, path, cost), priority
+    visited = set()
 
+    while not pq.isEmpty():
+        state, path, cost = pq.pop()
+
+        if state in visited:
+            continue
+
+        visited.add(state)
+
+        if problem.isGoalState(state):
+            return path
+
+        for successor, action, stepCost in problem.getSuccessors(state):
+            if successor not in visited:
+                new_cost = stepCost + cost
+                estimate = new_cost + heuristic(successor, problem)
+                pq.push((successor, path + [action], new_cost), estimate)
+
+    return []
 
 # Abbreviations - Common search algorithm aliases with type hints
 bfs: Callable[[SearchProblem], List[str]] = breadthFirstSearch
